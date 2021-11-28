@@ -170,6 +170,8 @@ public class Shape implements Movement, Rotation, Modified {
         }
     }
 
+
+    // remove the line if it fulled
     @Override
     public void checkLine() {
         int bottomLine = board.getBoard().length-1;

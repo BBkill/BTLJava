@@ -2,33 +2,34 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
-public class WaitWindow extends JPanel implements KeyListener {
+public class WaitWindow extends JPanel implements KeyListener{
 
     private static final long serialVersionUID = 1L;
-    private BufferedImage instruction;
+    private BufferedImage instruction,playButton, backGround;
     private Window window;
-    private BufferedImage[] playButton = new BufferedImage[4];
 
     private Timer timer;
 
     public WaitWindow(Window window)
     {
-        instruction = ImageLoader.loadImage("D:\\TetrisBTL\\src\\gui\\img\\arrow.png");
-        timer = new Timer(1000 / 60, new ActionListener() {
+        instruction = ImageLoader.loadImage("src\\gui\\img\\guide.png");
+        playButton = ImageLoader.loadImage("src\\gui\\img\\play.png");
+        backGround = ImageLoader.loadImage("src\\gui\\img\\backGround.png");
+
+
+
+        timer = new Timer(75 / 1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 repaint();
             }
         });
-        timer.start();
-        this.window=window;
 
+        this.window=window;
+        timer.start();
     }
 
     protected void paintComponent(Graphics g)
@@ -36,17 +37,22 @@ public class WaitWindow extends JPanel implements KeyListener {
         super.paintComponent(g);
         g.setColor(Color.black);
         g.fillRect(0,0,WaitWindow.WIDTH,WaitWindow.HEIGHT);
-        g.drawImage(instruction,WaitWindow.WIDTH/2-instruction.getWidth()/2,30-instruction.getHeight()/2+150,null);
+        g.drawImage(backGround,0,0,null);
+        g.drawImage(instruction,50,25,null);
 
-        g.setColor(Color.red);
 
-        g.drawString("Press space to play", 150, WaitWindow.HEIGHT/2+100);
+
+        g.drawImage(playButton,0,170,null);
+
+
+
+
     }
 
 
     @Override
     public void keyTyped(KeyEvent e) {
-        if(e.getKeyChar()==KeyEvent.VK_SPACE)
+        if(e.getKeyChar()==KeyEvent.VK_ENTER)
         {
             window.startTetris();
         }
@@ -61,4 +67,6 @@ public class WaitWindow extends JPanel implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
     }
+
+
 }

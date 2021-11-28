@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class Board extends JPanel implements KeyListener, Game, MouseMotionListener, MouseListener {
@@ -32,6 +33,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
 
+    private BufferedImage backGround, gameOver, newGameButton, continueButton, replayButtom;
 
 
     private ShapeT shapeT = new ShapeT(this);
@@ -49,7 +51,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private Shape nextShape = shapes[2];
 
-    //private int score = 0;
+    private int score = 0;
 
     public Board()
     {
@@ -60,6 +62,12 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
                 repaint();
             }
         });
+
+        backGround = ImageLoader.loadImage("src\\gui\\img\\backGround.png");
+        gameOver = ImageLoader.loadImage("src\\gui\\img\\gameOver.png");
+        newGameButton = ImageLoader.loadImage("src\\gui\\img\\newGame.png");
+        continueButton = ImageLoader.loadImage("src\\gui\\img\\continue.png");
+        replayButtom = ImageLoader.loadImage("src\\gui\\img\\replay.png");
         gameLoop.start();
     }
 
@@ -76,9 +84,9 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(Color.GRAY);
+        g.setColor(Color.BLACK);
         g.fillRect(0,0, getWidth(), getHeight());
-
+        g.drawImage(backGround,0,0,null);
         //draw the shape when it moves
         currentShape.render(g);
 
@@ -99,7 +107,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
 
         //draw the board (the line)
-        g.setColor(Color.WHITE);
+        g.setColor(Color.black);
         for (int row = 0 ; row < BOARD_HEIGHT; row++)
         {
             g.drawLine(0, BLOCK_SIZE * row, BLOCK_SIZE * BOARD_WIDTH,BLOCK_SIZE * row);
@@ -114,15 +122,15 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
         if(state == STATE_GAME_OVER )
         {
-            g.setColor(Color.orange);
-            g.drawString("GAME OVER",50,200);
+            g.drawImage(gameOver.getScaledInstance(300,180,BufferedImage.SCALE_DEFAULT), 0,200,null);
+            g.drawImage(replayButtom.getScaledInstance(50,50,1),125,350,null);
         }
     }
 
 
     public void setCurrentShape()
     {
-        //Random random = new Random();
+
         currentShape = nextShape;
         setNextShape();
         currentShape.reset();
@@ -240,24 +248,25 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     @Override
     public void startGame() {
-//        stopGame();
-//        setNextShape();
-//        setCurrentShape();
-//        state = STATE_GAME_OVER;
-//        gameLoop.start();
+        stopGame();
+        setNextShape();
+        setCurrentShape();
+        state = STATE_GAME_PLAY;
+        gameLoop.start();
     }
 
     @Override
     public void stopGame() {
-//        score = 0;
-//        for(int row = 0; row < board.length;row++)
-//        {
-//            for(int column = 0; column < board[row].length;column++)
-//            {
-//                board[row][column] = null;
-//            }
-//        }
-//        gameLoop.stop();
+        score = 0;
+        for(int row = 0; row < board.length;row++)
+        {
+            for(int column = 0; column < board[row].length;column++)
+            {
+                board[row][column] = null;
+            }
+        }
+        gameLoop.stop();
+        state = STATE_GAME_PAUSE;
     }
 
     @Override
