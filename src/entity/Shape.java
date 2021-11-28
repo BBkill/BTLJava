@@ -189,6 +189,9 @@ public class Shape implements Movement, Rotation, Modified {
             if(count < board.getBoard()[0].length)
             {
                 bottomLine--;
+            }else if(count == board.getBoard()[0].length)
+            {
+                board.addScore();
             }
         }
     }

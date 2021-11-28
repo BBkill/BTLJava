@@ -5,7 +5,8 @@ import java.awt.*;
 
 public class Window {
 
-    private static final int WIDTH = 445 , HEIGHT = 638;
+    public static final int WIDTH = 460;
+    public static final int HEIGHT = 638;
 
     private JFrame window;
     private WaitWindow waitWindow;
@@ -20,23 +21,21 @@ public class Window {
 
         board = new Board();
         waitWindow = new WaitWindow(this);
-
-
         window.addKeyListener(waitWindow);
         window.add(waitWindow);
-
         window.setBackground(Color.GRAY);
         window.setVisible(true);
     }
 
     public void startTetris()
     {
+
         window.remove(waitWindow);
-        window.add(board);
+        window.removeKeyListener(waitWindow);
         window.addMouseListener(board);
-        window.addMouseListener(board);
+        window.addMouseMotionListener(board);
         window.addKeyListener(board);
-        window.remove(waitWindow);
+        window.add(board);
         board.startGame();
         window.revalidate();
     }

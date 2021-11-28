@@ -38,15 +38,8 @@ public class WaitWindow extends JPanel implements KeyListener{
         g.setColor(Color.black);
         g.fillRect(0,0,WaitWindow.WIDTH,WaitWindow.HEIGHT);
         g.drawImage(backGround,0,0,null);
-        g.drawImage(instruction,50,25,null);
-
-
-
+        g.drawImage(instruction,60,25,null);
         g.drawImage(playButton,0,170,null);
-
-
-
-
     }
 
 
