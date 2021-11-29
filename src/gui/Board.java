@@ -27,17 +27,18 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private static int DELAY_TIME_GAME = FPS / 1000;
 
-    public static final int BOARD_WIDTH = 10,BOARD_HEIGHT = 20;
+    public static final int BOARD_WIDTH = 10, BOARD_HEIGHT = 20;
 
     public static final int BLOCK_SIZE = 30;
 
     private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
 
-    private static BufferedImage backGround, gameOver, newGameButton, continueButton, replayButton;
+    private static BufferedImage backGround, gameOver, newGameButton, continueButton, replayButton, pauseButton,
+            quiteButton;
 
-    private Rectangle newGameRect, continueRect, replayRect;
+    private Rectangle newGameRect, pauseRect, quitRect;
 
-    private int mouseX,mouseY;
+    private int mouseX, mouseY;
 
     private boolean leftClick = false;
 
@@ -49,17 +50,15 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
     private ShapeS shapeS = new ShapeS(this);
     private ShapeJ shapeJ = new ShapeJ(this);
 
+    private Shape[] shapes = { shapeI, shapeJ, shapeL, shapeS, shapeZ, shapeO, shapeT };
 
-    private Shape[] shapes =  {shapeI, shapeJ, shapeL, shapeS, shapeZ, shapeO, shapeT};
-    
     private Shape currentShape = shapes[1];
 
     private Shape nextShape = shapes[2];
 
     private int score = 0;
 
-    public Board()
-    {
+    public Board() {
         gameLoop = new Timer(DELAY_TIME_GAME, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -70,101 +69,134 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
         mouseX = 0;
         mouseY = 0;
+
         backGround = ImageLoader.loadImage("src\\gui\\img\\backGround.png");
         gameOver = ImageLoader.loadImage("src\\gui\\img\\gameOver.png");
         newGameButton = ImageLoader.loadImage("src\\gui\\img\\newGame.png");
         continueButton = ImageLoader.loadImage("src\\gui\\img\\continue.png");
         replayButton = ImageLoader.loadImage("src\\gui\\img\\replay.png");
+        pauseButton = ImageLoader.loadImage("src\\gui\\img\\pauseGame.png");
+        quiteButton = ImageLoader.loadImage("src\\gui\\img\\quit.png");
+
+        newGameRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 80, 100, 40);
+        pauseRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 130, 100, 40);
+        quitRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 180, 100, 40);
+
         gameLoop.start();
     }
 
+    private void update() {
+        if (newGameRect.contains(mouseX, mouseY) && leftClick) {
+            replayGame();
+        }
+        if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PLAY && leftClick) {
+            pauseGame();
+        } else if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PAUSE && leftClick) {
+            continueGame();
+        }
+        if (quitRect.contains(mouseX, mouseY) && leftClick) {
+            System.exit(0);
+        }
 
-    private void update()
-    {
-        if(state == STATE_GAME_PLAY)
-        {
+        if (state == STATE_GAME_PLAY) {
             currentShape.update();
         }
 
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         g.setColor(Color.BLACK);
-        g.fillRect(0,0, getWidth(), getHeight());
-        g.drawImage(backGround,0,0,null);
+        g.fillRect(0, 0, getWidth(), getHeight());
+        g.drawImage(backGround, 0, 0, null);
 
-
-        //draw the shape when it moves
+        // draw the shape when it moves
         currentShape.render(g);
 
-        System.out.println(mouseX+" "+mouseY);
-
-
-        //draw the shape when it stops moving
-        for (int row = 0; row < board.length; row++)
-        {
-            for (int column = 0 ; column < board[row].length; column++)
-            {
-                if(board[row][column] != null)
-                {
+        // draw the shape when it stops moving
+        for (int row = 0; row < board.length; row++) {
+            for (int column = 0; column < board[row].length; column++) {
+                if (board[row][column] != null) {
                     g.setColor(board[row][column]);
-                    g.fillRect(column*BLOCK_SIZE, row*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE);
+                    g.fillRect(column * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                 }
 
             }
         }
 
-        //draw the next shape
+        // draw the next shape
         g.setColor(nextShape.getColor());
         for (int row = 0; row < nextShape.getCoordinate().length; row++) {
             for (int col = 0; col < nextShape.getCoordinate()[0].length; col++) {
                 if (nextShape.getCoordinate()[row][col] != 0) {
                     g.fillRect(col * 30 + 320, row * 30 + 50, Board.BLOCK_SIZE, Board.BLOCK_SIZE);
                     g.setColor(Color.black);
-                    g.drawLine(col * 30 + 320, row * 30 + 50,col * 30 + 320+Board.BLOCK_SIZE,row * 30 + 50);
-                    g.drawLine(col * 30 + 320, row * 30 + 50,col * 30 + 320,row * 30 + 50+Board.BLOCK_SIZE);
+                    g.drawLine(col * 30 + 320, row * 30 + 50, col * 30 + 320 + Board.BLOCK_SIZE, row * 30 + 50);
+                    g.drawLine(col * 30 + 320, row * 30 + 50, col * 30 + 320, row * 30 + 50 + Board.BLOCK_SIZE);
 
                 }
                 g.setColor(nextShape.getColor());
             }
         }
 
-        //draw score
+        // draw score
         g.setColor(Color.WHITE);
         g.setFont(new Font("Georgia", Font.BOLD, 20));
-        g.drawString("SCORE", Window.WIDTH - 125, Window.HEIGHT / 2);
-        g.drawString(score + "", Window.WIDTH - 125, Window.HEIGHT / 2 + 30);
+        g.drawString("SCORE", Window.WIDTH - 125, Window.HEIGHT / 2 - 50);
+        g.drawString(score + "", Window.WIDTH - 125, Window.HEIGHT / 2 - 20);
 
+        // draw function button
 
-        //draw the board (the line)
-        g.setColor(Color.black);
-        for (int row = 0 ; row < BOARD_HEIGHT; row++)
-        {
-            g.drawLine(0, BLOCK_SIZE * row, BLOCK_SIZE * BOARD_WIDTH,BLOCK_SIZE * row);
+        if (newGameRect.contains(mouseX, mouseY)) {
+            g.drawImage(newGameButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 50,
+                    null);
+        } else {
+            g.drawImage(newGameButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 50, null);
         }
-        for (int column = 0; column < BOARD_WIDTH + 1; column++)
-        {
+
+        if (pauseRect.contains(mouseX, mouseY)) {
+            g.drawImage(pauseButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100,
+                    null);
+        } else {
+            g.drawImage(pauseButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100, null);
+        }
+        if (quitRect.contains(mouseX, mouseY)) {
+            g.drawImage(quiteButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 150,
+                    null);
+        } else {
+            g.drawImage(quiteButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 150, null);
+        }
+
+        // draw the board (the line)
+        g.setColor(Color.black);
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            g.drawLine(0, BLOCK_SIZE * row, BLOCK_SIZE * BOARD_WIDTH, BLOCK_SIZE * row);
+        }
+        for (int column = 0; column < BOARD_WIDTH + 1; column++) {
             g.drawLine(column * BLOCK_SIZE, 0, column * BLOCK_SIZE, BLOCK_SIZE * BOARD_HEIGHT);
         }
 
-
-
-        if(state == STATE_GAME_OVER )
-        {
-            g.drawImage(gameOver.getScaledInstance(300,180,BufferedImage.SCALE_DEFAULT), 0,200,null);
-            g.drawImage(replayButton.getScaledInstance(50,50,1),125,350,null);
+        // draw game over image
+        if (state == STATE_GAME_OVER) {
+            g.drawImage(gameOver.getScaledInstance(300, 180, BufferedImage.SCALE_DEFAULT), 0, 200, null);
+            g.drawImage(replayButton.getScaledInstance(50, 50, 1), 125, 350, null);
         }
-        if(state == STATE_GAME_PAUSE)
-        {
-            g.drawImage(continueButton.getScaledInstance(150,50,1),125,250,null);
+
+        // draw game pause
+        if (state == STATE_GAME_PAUSE) {
+            if (pauseRect.contains(mouseX, mouseY)) {
+                g.drawImage(continueButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138,
+                        Window.HEIGHT / 2 + 100, null);
+            } else {
+                g.drawImage(continueButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100,
+                        null);
+            }
         }
     }
 
-
-    public void setCurrentShape()
-    {
+    public void setCurrentShape() {
 
         currentShape = nextShape;
 
@@ -174,21 +206,19 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         checkOverGame();
 
     }
-    public void setNextShape()
-    {
+
+    public void setNextShape() {
         Random random = new Random();
         nextShape = shapes[random.nextInt(7)];
     }
 
-    public Color[][] getBoard()
-    {
+    public Color[][] getBoard() {
         return board;
     }
 
-    public void addScore(){
-        score ++;
+    public void addScore() {
+        score++;
     }
-
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -197,46 +227,33 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_DOWN)
-        {
+        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
             currentShape.speedUp();
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_RIGHT)
-        {
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             currentShape.moveRight();
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_LEFT)
-        {
+        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
             currentShape.moveLeft();
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_UP) {
+        } else if (e.getKeyCode() == KeyEvent.VK_UP) {
             currentShape.rotate();
-        }else if(e.getKeyCode() == KeyEvent.VK_SPACE)
-        {
-            if(state == STATE_GAME_PLAY)
-            {
+        } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            if (state == STATE_GAME_PLAY) {
                 pauseGame();
-            }
-            else if(state == STATE_GAME_PAUSE)
-            {
+            } else if (state == STATE_GAME_PAUSE) {
                 continueGame();
             }
         }
 
-        if(state == STATE_GAME_OVER)
-        {
-            if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+        if (state == STATE_GAME_OVER) {
+            if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 replayGame();
             }
         }
-
 
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_DOWN)
-        {
+        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
             currentShape.speedDown();
         }
     }
@@ -244,30 +261,23 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
     @Override
     public void checkOverGame() {
         int[][] coordinate = currentShape.getCoordinate();
-        for(int row = 0; row < coordinate.length;row++)
-        {
-            for (int column = 0;column<coordinate[row].length;column++)
-            {
-                if(coordinate[row][column]!=0)
-                {
-                    if(board[row + currentShape.getY()][column + currentShape.getX()]!=null)
-                    {
+        for (int row = 0; row < coordinate.length; row++) {
+            for (int column = 0; column < coordinate[row].length; column++) {
+                if (coordinate[row][column] != 0) {
+                    if (board[row + currentShape.getY()][column + currentShape.getX()] != null) {
                         state = STATE_GAME_OVER;
                     }
                 }
             }
         }
 
-
     }
 
     @Override
     public void replayGame() {
-        //clear the board
-        for(int row = 0; row < board.length;row++)
-        {
-            for(int column = 0; column < board[row].length;column++)
-            {
+        // clear the board
+        for (int row = 0; row < board.length; row++) {
+            for (int column = 0; column < board[row].length; column++) {
                 board[row][column] = null;
             }
         }
@@ -299,10 +309,8 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
     @Override
     public void stopGame() {
         score = 0;
-        for(int row = 0; row < board.length;row++)
-        {
-            for(int column = 0; column < board[row].length;column++)
-            {
+        for (int row = 0; row < board.length; row++) {
+            for (int column = 0; column < board[row].length; column++) {
                 board[row][column] = null;
             }
         }
@@ -312,8 +320,8 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
-//        mouseX = e.getX();
-//        mouseY = e.getY();
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 
     @Override

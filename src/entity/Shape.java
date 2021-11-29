@@ -11,7 +11,7 @@ import static gui.Board.BLOCK_SIZE;
 import static gui.Board.BOARD_HEIGHT;
 
 public class Shape implements Movement, Rotation, Modified {
-    //coordinate of entity at the beginning
+    // coordinate of entity at the beginning
     private int x = 4, y = 0;
 
     private int normal = 300;
@@ -28,18 +28,19 @@ public class Shape implements Movement, Rotation, Modified {
     private Color color;
 
     private Board board;
-    public Shape(Board board){
+
+    public Shape(Board board) {
         this.board = board;
     }
 
-    public void reset()
-    {
-        this.x=4;
-        this.y=0;
+    public void reset() {
+        this.x = 4;
+        this.y = 0;
         collision = false;
         delayTimeFoMovement = normal;
 
     }
+
     protected void setCoordinate(int[][] coordinate) {
         this.coordinate = coordinate;
     }
@@ -48,17 +49,11 @@ public class Shape implements Movement, Rotation, Modified {
         this.color = color;
     }
 
-
-    public void update()
-    {
-        if(collision)
-        {
-            for (int row  = 0; row < coordinate.length;row++)
-            {
-                for(int column = 0; column <coordinate[0].length;column++)
-                {
-                    if (coordinate[row][column] != 0)
-                    {
+    public void update() {
+        if (collision) {
+            for (int row = 0; row < coordinate.length; row++) {
+                for (int column = 0; column < coordinate[0].length; column++) {
+                    if (coordinate[row][column] != 0) {
                         board.getBoard()[y + row][x + column] = color;
                     }
                 }
@@ -69,54 +64,40 @@ public class Shape implements Movement, Rotation, Modified {
             return;
         }
         boolean moveX = true;
-        //check the horizon
-        if(!(x + dentalX +coordinate[0].length>10) && !(x+dentalX<0))
-        {
-            for(int row = 0; row < coordinate.length; row++)
-            {
-                for (int column = 0;column<coordinate[row].length;column++)
-                {
-                    if(coordinate[row][column]!=0)
-                    {
-                        if(board.getBoard()[y+row][x+dentalX+column]!=null)
-                        {
+        // check the horizon
+        if (!(x + dentalX + coordinate[0].length > 10) && !(x + dentalX < 0)) {
+            for (int row = 0; row < coordinate.length; row++) {
+                for (int column = 0; column < coordinate[row].length; column++) {
+                    if (coordinate[row][column] != 0) {
+                        if (board.getBoard()[y + row][x + dentalX + column] != null) {
                             moveX = false;
                         }
                     }
                 }
             }
-            if(moveX)
-            {
+            if (moveX) {
                 x = x + dentalX;
             }
 
-
         }
         dentalX = 0;
-        //move
-        if(System.currentTimeMillis()-beginTime>delayTimeFoMovement)
-        {
-            if(!(y+1+coordinate.length>BOARD_HEIGHT))
-            {
-                for(int row = 0; row < coordinate.length; row++)
-                {
-                    for (int column = 0;column<coordinate[row].length;column++)
-                    {
-                        if (coordinate[row][column]!=0)
-                        {
-                            if(board.getBoard()[y+1+row][x+dentalX+column]!=null)
-                            {
+        // move
+        if (System.currentTimeMillis() - beginTime > delayTimeFoMovement) {
+            if (!(y + 1 + coordinate.length > BOARD_HEIGHT)) {
+                for (int row = 0; row < coordinate.length; row++) {
+                    for (int column = 0; column < coordinate[row].length; column++) {
+                        if (coordinate[row][column] != 0) {
+                            if (board.getBoard()[y + 1 + row][x + dentalX + column] != null) {
                                 collision = true;
                             }
                         }
                     }
                 }
-                if(!collision)
-                {
+                if (!collision) {
                     y++;
                 }
 
-            }else {
+            } else {
                 collision = true;
             }
 
@@ -148,49 +129,36 @@ public class Shape implements Movement, Rotation, Modified {
         return coordinate;
     }
 
-
-
-
-
     @Override
-    public void render(Graphics g)
-    {
-        //draw shape
-        for (int row = 0; row <coordinate.length;row++)
-        {
-            for (int column = 0 ; column<coordinate[0].length;column++)
-            {
-                if(coordinate[row][column] != 0)
-                {
+    public void render(Graphics g) {
+        // draw shape
+        for (int row = 0; row < coordinate.length; row++) {
+            for (int column = 0; column < coordinate[0].length; column++) {
+                if (coordinate[row][column] != 0) {
                     g.setColor(color);
-                    g.fillRect(column*BLOCK_SIZE+x*BLOCK_SIZE, row*BLOCK_SIZE+y*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE);
+                    g.fillRect(column * BLOCK_SIZE + x * BLOCK_SIZE, row * BLOCK_SIZE + y * BLOCK_SIZE, BLOCK_SIZE,
+                            BLOCK_SIZE);
                 }
 
             }
         }
     }
 
-
     // remove the line if it fulled
     @Override
     public void checkLine() {
-        int bottomLine = board.getBoard().length-1;
-        for(int topLine = board.getBoard().length-1; topLine >0 ; topLine--)
-        {
+        int bottomLine = board.getBoard().length - 1;
+        for (int topLine = board.getBoard().length - 1; topLine > 0; topLine--) {
             int count = 0;
-            for(int column = 0;column < board.getBoard()[0].length;column++)
-            {
-                if(board.getBoard()[topLine][column]!=null)
-                {
+            for (int column = 0; column < board.getBoard()[0].length; column++) {
+                if (board.getBoard()[topLine][column] != null) {
                     count++;
                 }
-                board.getBoard()[bottomLine][column]=board.getBoard()[topLine][column];
+                board.getBoard()[bottomLine][column] = board.getBoard()[topLine][column];
             }
-            if(count < board.getBoard()[0].length)
-            {
+            if (count < board.getBoard()[0].length) {
                 bottomLine--;
-            }else if(count == board.getBoard()[0].length)
-            {
+            } else if (count == board.getBoard()[0].length) {
                 board.addScore();
             }
         }
@@ -220,22 +188,17 @@ public class Shape implements Movement, Rotation, Modified {
     public void rotate() {
         int[][] rotateShape = transposeShape(coordinate);
         reverseShape(rotateShape);
-        //check coordinate if to close to the boor
-        if((x+rotateShape[0].length > Board.BOARD_WIDTH)||(y + rotateShape.length>20))
-        {
+        // check coordinate if to close to the boor
+        if ((x + rotateShape[0].length > Board.BOARD_WIDTH) || (y + rotateShape.length > 20)) {
             return;
         }
 
-        //check for collision with other shapes
+        // check for collision with other shapes
 
-        for(int row = 0; row < rotateShape.length; row++)
-        {
-            for(int column = 0; column <rotateShape[row].length; column++)
-            {
-                if(rotateShape[row][column] != 0)
-                {
-                    if(board.getBoard()[y + row][x+column] != null)
-                    {
+        for (int row = 0; row < rotateShape.length; row++) {
+            for (int column = 0; column < rotateShape[row].length; column++) {
+                if (rotateShape[row][column] != 0) {
+                    if (board.getBoard()[y + row][x + column] != null) {
                         return;
                     }
                 }
@@ -247,10 +210,8 @@ public class Shape implements Movement, Rotation, Modified {
     @Override
     public int[][] transposeShape(int[][] matrix) {
         int[][] temp = new int[matrix[0].length][matrix.length];
-        for(int row = 0; row <matrix.length;row++)
-        {
-            for (int column = 0; column < matrix[0].length;column++)
-            {
+        for (int row = 0; row < matrix.length; row++) {
+            for (int column = 0; column < matrix[0].length; column++) {
                 temp[column][row] = matrix[row][column];
             }
         }
@@ -260,11 +221,10 @@ public class Shape implements Movement, Rotation, Modified {
     @Override
     public void reverseShape(int[][] matrix) {
         int middle = matrix.length / 2;
-        for(int row = 0; row <middle;row ++)
-        {
+        for (int row = 0; row < middle; row++) {
             int[] tmp = matrix[row];
-            matrix[row] = matrix[matrix.length-row -1 ];
-            matrix[matrix.length - row -1] = tmp;
+            matrix[row] = matrix[matrix.length - row - 1];
+            matrix[matrix.length - row - 1] = tmp;
         }
     }
 }

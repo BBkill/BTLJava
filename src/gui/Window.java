@@ -11,10 +11,10 @@ public class Window {
     private JFrame window;
     private WaitWindow waitWindow;
     private Board board;
-    public Window()
-    {
+
+    public Window() {
         window = new JFrame("Tetris");
-        window.setSize(WIDTH,HEIGHT);
+        window.setSize(WIDTH, HEIGHT);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
@@ -27,8 +27,7 @@ public class Window {
         window.setVisible(true);
     }
 
-    public void startTetris()
-    {
+    public void startTetris() {
 
         window.remove(waitWindow);
         window.removeKeyListener(waitWindow);

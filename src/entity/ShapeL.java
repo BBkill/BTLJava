@@ -4,11 +4,12 @@ import gui.Board;
 
 import java.awt.*;
 
-public class ShapeL extends Shape{
+public class ShapeL extends Shape {
     private int[][] shapeL = {
-            {1,1,1},
-            {1,0,0}
+            { 1, 1, 1 },
+            { 1, 0, 0 }
     };
+
     public ShapeL(Board board) {
         super(board);
         this.setCoordinate(shapeL);
