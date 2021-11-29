@@ -3,26 +3,35 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 
-public class Window {
+public class Window extends JFrame {
 
     public static final int WIDTH = 460;
     public static final int HEIGHT = 638;
 
-    private JFrame window;
-    private WaitWindow waitWindow;
+
+
+    private static JFrame window;
+    private static WaitWindow waitWindow;
     private Board board;
 
     public Window() {
         window = new JFrame("Tetris");
+
         window.setSize(WIDTH, HEIGHT);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
 
+
+
+
+
         board = new Board();
         waitWindow = new WaitWindow(this);
         window.addKeyListener(waitWindow);
         window.add(waitWindow);
+
+
         window.setBackground(Color.GRAY);
         window.setVisible(true);
     }

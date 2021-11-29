@@ -10,4 +10,6 @@ public interface Movement {
     public void moveLeft();
 
     public void checkLine();
+
+
 }

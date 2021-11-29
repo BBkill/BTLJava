@@ -12,4 +12,10 @@ public interface Game {
     public void startGame();
 
     public void stopGame();
+
+    public void increaseSpeed();
+
+    public void decreaseSpeed();
+
+    public int getLevel();
 }

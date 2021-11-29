@@ -25,18 +25,20 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private static int FPS = 75;
 
+    private int speedGame = 500;
+
     private static int DELAY_TIME_GAME = FPS / 1000;
 
     public static final int BOARD_WIDTH = 10, BOARD_HEIGHT = 20;
 
     public static final int BLOCK_SIZE = 30;
 
-    private Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
+    private static Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
 
     private static BufferedImage backGround, gameOver, newGameButton, continueButton, replayButton, pauseButton,
-            quiteButton;
+            quiteButton, incSpeedButton, decSpeedButton;
 
-    private Rectangle newGameRect, pauseRect, quitRect;
+    private static Rectangle newGameRect, pauseRect, quitRect, replayRect, incSpeedRect, decSpeedRect;
 
     private int mouseX, mouseY;
 
@@ -58,6 +60,14 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private int score = 0;
 
+    private Timer buttonLapse = new Timer(300, new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            buttonLapse.stop();
+        }
+    });
+
     public Board() {
         gameLoop = new Timer(DELAY_TIME_GAME, new ActionListener() {
             @Override
@@ -77,11 +87,15 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         replayButton = ImageLoader.loadImage("src\\gui\\img\\replay.png");
         pauseButton = ImageLoader.loadImage("src\\gui\\img\\pauseGame.png");
         quiteButton = ImageLoader.loadImage("src\\gui\\img\\quit.png");
+        incSpeedButton = ImageLoader.loadImage("src\\gui\\img\\inc.png");
+        decSpeedButton = ImageLoader.loadImage("src\\gui\\img\\dec.png");
 
         newGameRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 80, 100, 40);
         pauseRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 130, 100, 40);
         quitRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 180, 100, 40);
-
+        replayRect = new Rectangle(135, 370, 50, 70);
+        incSpeedRect = new Rectangle(Window.WIDTH - 138 + 50, Window.HEIGHT / 2, 50 ,50);
+        decSpeedRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2, 50 ,50);
         gameLoop.start();
     }
 
@@ -89,9 +103,11 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         if (newGameRect.contains(mouseX, mouseY) && leftClick) {
             replayGame();
         }
-        if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PLAY && leftClick) {
+        if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PLAY && leftClick && !buttonLapse.isRunning()) {
+            buttonLapse.start();
             pauseGame();
-        } else if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PAUSE && leftClick) {
+        } else if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PAUSE && leftClick && !buttonLapse.isRunning()) {
+            buttonLapse.start();
             continueGame();
         }
         if (quitRect.contains(mouseX, mouseY) && leftClick) {
@@ -102,6 +118,25 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
             currentShape.update();
         }
 
+        if (replayRect.contains(mouseX, mouseY) && state == STATE_GAME_OVER && leftClick)
+        {
+            replayGame();
+        }
+        if (decSpeedRect.contains(mouseX, mouseY) && leftClick && !buttonLapse.isRunning())
+        {
+            buttonLapse.start();
+            decreaseSpeed();
+        }
+        if(incSpeedRect.contains(mouseX, mouseY) && leftClick && !buttonLapse.isRunning())
+        {
+            buttonLapse.start();
+            increaseSpeed();
+        }
+
+    }
+
+    public int getSpeedGame() {
+        return speedGame;
     }
 
     @Override
@@ -144,10 +179,28 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         // draw score
         g.setColor(Color.WHITE);
         g.setFont(new Font("Georgia", Font.BOLD, 20));
-        g.drawString("SCORE", Window.WIDTH - 125, Window.HEIGHT / 2 - 50);
-        g.drawString(score + "", Window.WIDTH - 125, Window.HEIGHT / 2 - 20);
+        g.drawString("SCORE", Window.WIDTH - 125, Window.HEIGHT / 2 - 130);
+        g.drawString(score + "", Window.WIDTH - 125, Window.HEIGHT / 2 - 100);
+
+        // draw the game's level
+        g.setFont(new Font("Georgia", Font.BOLD, 20));
+        g.drawString("Level: ", Window.WIDTH - 125, Window.HEIGHT / 2 - 70);
+        g.drawString(getLevel() + "", Window.WIDTH -60, Window.HEIGHT / 2 - 70);
+
+
+
 
         // draw function button
+        if (incSpeedRect.contains(mouseX, mouseY)) {
+            g.drawImage(incSpeedButton.getScaledInstance(50, 50, 1), Window.WIDTH - 138 + 50, Window.HEIGHT / 2 - 30, null);
+        } else {
+            g.drawImage(incSpeedButton.getScaledInstance(45, 45, 1), Window.WIDTH - 138 + 50, Window.HEIGHT / 2 - 30, null);
+        }
+        if (decSpeedRect.contains(mouseX, mouseY)) {
+            g.drawImage(decSpeedButton.getScaledInstance(50, 50, 1), Window.WIDTH - 138, Window.HEIGHT / 2 - 30, null);
+        } else {
+            g.drawImage(decSpeedButton.getScaledInstance(45, 45, 1), Window.WIDTH - 138, Window.HEIGHT / 2 - 30, null);
+        }
 
         if (newGameRect.contains(mouseX, mouseY)) {
             g.drawImage(newGameButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 50,
@@ -181,7 +234,11 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         // draw game over image
         if (state == STATE_GAME_OVER) {
             g.drawImage(gameOver.getScaledInstance(300, 180, BufferedImage.SCALE_DEFAULT), 0, 200, null);
-            g.drawImage(replayButton.getScaledInstance(50, 50, 1), 125, 350, null);
+            if (replayRect.contains(mouseX, mouseY)) {
+                g.drawImage(replayButton.getScaledInstance(56, 56, 1), 120, 345, null);
+            } else {
+                g.drawImage(replayButton.getScaledInstance(50, 50, 1), 125, 350, null);
+            }
         }
 
         // draw game pause
@@ -199,15 +256,14 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
     public void setCurrentShape() {
 
         currentShape = nextShape;
-
         currentShape.reset();
         setNextShape();
-
         checkOverGame();
 
     }
 
-    public void setNextShape() {
+
+    private void setNextShape() {
         Random random = new Random();
         nextShape = shapes[random.nextInt(7)];
     }
@@ -316,6 +372,36 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         }
         gameLoop.stop();
         state = STATE_GAME_PAUSE;
+    }
+
+    @Override
+    public void increaseSpeed() {
+        if (speedGame > 100)
+        {
+            speedGame = speedGame - 50;
+        }
+    }
+
+    @Override
+    public void decreaseSpeed() {
+        if (speedGame <500)
+        {
+            speedGame = speedGame + 50;
+        }
+
+    }
+
+    @Override
+    public int getLevel() {
+        if (speedGame == 500) return 1;
+        if (speedGame == 450) return 2;
+        if (speedGame == 400) return 3;
+        if (speedGame == 350) return 4;
+        if (speedGame == 300) return 5;
+        if (speedGame == 250) return 6;
+        if (speedGame == 200) return 7;
+        if (speedGame == 150) return 8;
+        return 9;
     }
 
     @Override

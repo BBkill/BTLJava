@@ -14,10 +14,11 @@ public class Shape implements Movement, Rotation, Modified {
     // coordinate of entity at the beginning
     private int x = 4, y = 0;
 
-    private int normal = 300;
-    private int fast = 100;
+    private int normal = 500;
+    private int fast = 10;
     private int delayTimeFoMovement = normal;
     private long beginTime;
+
 
     private int dentalX = 0;
 
@@ -37,8 +38,7 @@ public class Shape implements Movement, Rotation, Modified {
         this.x = 4;
         this.y = 0;
         collision = false;
-        delayTimeFoMovement = normal;
-
+        delayTimeFoMovement = board.getSpeedGame();
     }
 
     protected void setCoordinate(int[][] coordinate) {
@@ -60,7 +60,6 @@ public class Shape implements Movement, Rotation, Modified {
             }
             checkLine();
             board.setCurrentShape();
-
             return;
         }
         boolean moveX = true;
@@ -164,6 +163,8 @@ public class Shape implements Movement, Rotation, Modified {
         }
     }
 
+
+
     @Override
     public void speedUp() {
         delayTimeFoMovement = fast;
@@ -171,7 +172,7 @@ public class Shape implements Movement, Rotation, Modified {
 
     @Override
     public void speedDown() {
-        delayTimeFoMovement = normal;
+        delayTimeFoMovement = board.getSpeedGame();
     }
 
     @Override
