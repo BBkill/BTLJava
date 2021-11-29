@@ -15,29 +15,26 @@ public class Window extends JFrame {
     private Board board;
 
     public Window() {
+
+    }
+
+    public void run()
+    {
         window = new JFrame("Tetris");
         window.setIconImage(ImageLoader.loadImage("src\\gui\\img\\icon.png"));
         window.setSize(WIDTH, HEIGHT);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
-
-
-
-
-
         board = new Board();
         waitWindow = new WaitWindow(this);
         window.addKeyListener(waitWindow);
         window.add(waitWindow);
-
-
         window.setBackground(Color.GRAY);
         window.setVisible(true);
     }
 
     public void startTetris() {
-
         window.remove(waitWindow);
         window.removeKeyListener(waitWindow);
         window.addMouseListener(board);
