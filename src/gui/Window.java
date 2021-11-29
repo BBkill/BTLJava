@@ -16,7 +16,7 @@ public class Window extends JFrame {
 
     public Window() {
         window = new JFrame("Tetris");
-
+        window.setIconImage(ImageLoader.loadImage("src\\gui\\img\\icon.png"));
         window.setSize(WIDTH, HEIGHT);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
