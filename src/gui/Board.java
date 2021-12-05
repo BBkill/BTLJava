@@ -258,9 +258,6 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         checkOverGame();
     }
 
-
-
-
     private void setNextShape() {
         Random random = new Random();
         nextShape = shapes[random.nextInt(shapes.length)];

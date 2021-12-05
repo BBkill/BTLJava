@@ -10,7 +10,8 @@ import java.awt.*;
 import static gui.Board.BLOCK_SIZE;
 import static gui.Board.BOARD_HEIGHT;
 
-public class Shape implements Movement, Rotation, Modified {
+public abstract class Shape implements Movement, Rotation, Modified {
+
     // coordinate of entity at the beginning
     private int x = 4, y = 0;
 
@@ -50,6 +51,7 @@ public class Shape implements Movement, Rotation, Modified {
     }
 
     public void update() {
+        // check rick the bottom
         if (collision) {
             for (int row = 0; row < coordinate.length; row++) {
                 for (int column = 0; column < coordinate[0].length; column++) {
@@ -104,10 +106,8 @@ public class Shape implements Movement, Rotation, Modified {
         }
     }
 
-
     // avoid collision
-    public void updateSpecial()
-    {
+    public void updateSpecial() {
         // rick the bottom
         if (collision) {
             boolean moveX = true;
@@ -198,6 +198,7 @@ public class Shape implements Movement, Rotation, Modified {
         return coordinate;
     }
 
+    // entities fall
     @Override
     public void fall(Graphics g) {
         // draw shape when moving

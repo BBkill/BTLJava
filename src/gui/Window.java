@@ -7,9 +7,6 @@ public class Window extends JFrame {
 
     public static final int WIDTH = 460;
     public static final int HEIGHT = 638;
-
-
-
     private static JFrame window;
     private static WaitWindow waitWindow;
     private Board board;
@@ -18,8 +15,7 @@ public class Window extends JFrame {
 
     }
 
-    public void run()
-    {
+    public void run() {
         window = new JFrame("Tetris");
         window.setIconImage(ImageLoader.loadImage("src\\gui\\img\\icon.png"));
         window.setSize(WIDTH, HEIGHT);

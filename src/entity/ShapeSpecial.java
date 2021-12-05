@@ -5,7 +5,6 @@ import gui.Board;
 import java.awt.*;
 
 public class ShapeSpecial extends Shape {
-
     public ShapeSpecial(Board board) {
 
         super(board);
