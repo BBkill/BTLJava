@@ -18,4 +18,6 @@ public interface Game {
     public void decreaseSpeed();
 
     public int getLevel();
+
+    public void upLevel();
 }

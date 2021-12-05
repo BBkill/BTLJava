@@ -9,6 +9,8 @@ import java.awt.*;
 
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Board extends JPanel implements KeyListener, Game, MouseMotionListener, MouseListener {
@@ -21,38 +23,49 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private int state = STATE_GAME_PLAY;
 
-    private Timer gameLoop;
+    private final Timer gameLoop;
 
-    private static int FPS = 75;
+    private static final int FPS = 75;
 
     private int speedGame = 500;
 
-    private static int DELAY_TIME_GAME = FPS / 1000;
+    private static final int DELAY_TIME_GAME = FPS / 1000;
 
     public static final int BOARD_WIDTH = 10, BOARD_HEIGHT = 20;
 
     public static final int BLOCK_SIZE = 30;
 
-    private static Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
+    private static final Color[][] board = new Color[BOARD_HEIGHT][BOARD_WIDTH];
 
     private static BufferedImage backGround, gameOver, newGameButton, continueButton, replayButton, pauseButton,
-            quiteButton, incSpeedButton, decSpeedButton;
+            quiteButton;
 
-    private static Rectangle newGameRect, pauseRect, quitRect, replayRect, incSpeedRect, decSpeedRect;
+    private static Rectangle newGameRect, pauseRect, quitRect, replayRect;
 
     private int mouseX, mouseY;
 
     private boolean leftClick = false;
 
-    private ShapeT shapeT = new ShapeT(this);
-    private ShapeI shapeI = new ShapeI(this);
-    private ShapeO shapeO = new ShapeO(this);
-    private ShapeL shapeL = new ShapeL(this);
-    private ShapeZ shapeZ = new ShapeZ(this);
-    private ShapeS shapeS = new ShapeS(this);
-    private ShapeJ shapeJ = new ShapeJ(this);
+    private final ShapeT shapeT = new ShapeT(this);
+    private final ShapeI shapeI = new ShapeI(this);
+    private final ShapeO shapeO = new ShapeO(this);
+    private final ShapeL shapeL = new ShapeL(this);
+    private final ShapeZ shapeZ = new ShapeZ(this);
+    private final ShapeS shapeS = new ShapeS(this);
+    private final ShapeJ shapeJ = new ShapeJ(this);
+    private final ShapeSpecial shapeSpecial = new ShapeSpecial(this);
+    private final SpecialShape_1 specialShape_1 = new SpecialShape_1(this);
+    private final SpecialShape_2 specialShape_2 = new SpecialShape_2(this);
+    private final SpecialShape_3 specialShape_3 = new SpecialShape_3(this);
 
-    private Shape[] shapes = { shapeI, shapeJ, shapeL, shapeS, shapeZ, shapeO, shapeT };
+    private final ArrayList<Shape> specialShapes = new ArrayList<Shape>(){{
+        add(specialShape_2);
+        add(specialShape_3);
+        add(specialShape_1);
+        add(shapeSpecial);
+        }
+    };
+    private final Shape[] shapes = { shapeI, shapeJ, shapeL, shapeS, shapeZ, shapeO, shapeT, shapeSpecial,shapeI, shapeJ, shapeL, shapeS, shapeZ, shapeO, shapeT, specialShape_1, specialShape_2,specialShape_3, shapeI, shapeJ, shapeL, shapeS, shapeZ, shapeO, shapeT};
 
     private Shape currentShape = shapes[1];
 
@@ -60,7 +73,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     private int score = 0;
 
-    private Timer buttonLapse = new Timer(300, new ActionListener() {
+    private final Timer buttonLapse = new Timer(300, new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -87,15 +100,12 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         replayButton = ImageLoader.loadImage("src\\gui\\img\\replay.png");
         pauseButton = ImageLoader.loadImage("src\\gui\\img\\pauseGame.png");
         quiteButton = ImageLoader.loadImage("src\\gui\\img\\quit.png");
-        incSpeedButton = ImageLoader.loadImage("src\\gui\\img\\inc.png");
-        decSpeedButton = ImageLoader.loadImage("src\\gui\\img\\dec.png");
+
 
         newGameRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 80, 100, 40);
         pauseRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 130, 100, 40);
         quitRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2 + 180, 100, 40);
         replayRect = new Rectangle(135, 370, 50, 70);
-        incSpeedRect = new Rectangle(Window.WIDTH - 138 + 50, Window.HEIGHT / 2, 50 ,50);
-        decSpeedRect = new Rectangle(Window.WIDTH - 138, Window.HEIGHT / 2, 50 ,50);
         gameLoop.start();
     }
 
@@ -115,24 +125,20 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         }
 
         if (state == STATE_GAME_PLAY) {
-            currentShape.update();
+            if(specialShapes.contains(currentShape) )
+            {
+                currentShape.updateSpecial();
+            }
+            else
+            {
+                currentShape.update();
+            }
         }
 
         if (replayRect.contains(mouseX, mouseY) && state == STATE_GAME_OVER && leftClick)
         {
             replayGame();
         }
-        if (decSpeedRect.contains(mouseX, mouseY) && leftClick && !buttonLapse.isRunning())
-        {
-            buttonLapse.start();
-            decreaseSpeed();
-        }
-        if(incSpeedRect.contains(mouseX, mouseY) && leftClick && !buttonLapse.isRunning())
-        {
-            buttonLapse.start();
-            increaseSpeed();
-        }
-
     }
 
     public int getSpeedGame() {
@@ -147,8 +153,6 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         g.fillRect(0, 0, getWidth(), getHeight());
         g.drawImage(backGround, 0, 0, null);
 
-        // draw the shape when it moves
-        currentShape.render(g);
 
         // draw the shape when it stops moving
         for (int row = 0; row < board.length; row++) {
@@ -157,7 +161,6 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
                     g.setColor(board[row][column]);
                     g.fillRect(column * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                 }
-
             }
         }
 
@@ -176,6 +179,10 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
             }
         }
 
+        // draw the shape when it moves
+        currentShape.fall(g);
+
+
         // draw score
         g.setColor(Color.WHITE);
         g.setFont(new Font("Georgia", Font.BOLD, 20));
@@ -191,16 +198,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
 
         // draw function button
-        if (incSpeedRect.contains(mouseX, mouseY)) {
-            g.drawImage(incSpeedButton.getScaledInstance(50, 50, 1), Window.WIDTH - 138 + 50, Window.HEIGHT / 2 - 30, null);
-        } else {
-            g.drawImage(incSpeedButton.getScaledInstance(45, 45, 1), Window.WIDTH - 138 + 50, Window.HEIGHT / 2 - 30, null);
-        }
-        if (decSpeedRect.contains(mouseX, mouseY)) {
-            g.drawImage(decSpeedButton.getScaledInstance(50, 50, 1), Window.WIDTH - 138, Window.HEIGHT / 2 - 30, null);
-        } else {
-            g.drawImage(decSpeedButton.getScaledInstance(45, 45, 1), Window.WIDTH - 138, Window.HEIGHT / 2 - 30, null);
-        }
+
 
         if (newGameRect.contains(mouseX, mouseY)) {
             g.drawImage(newGameButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 50,
@@ -254,18 +252,18 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
     }
 
     public void setCurrentShape() {
-
         currentShape = nextShape;
         currentShape.reset();
         setNextShape();
         checkOverGame();
-
     }
+
+
 
 
     private void setNextShape() {
         Random random = new Random();
-        nextShape = shapes[random.nextInt(7)];
+        nextShape = shapes[random.nextInt(shapes.length)];
     }
 
     public Color[][] getBoard() {
@@ -274,6 +272,10 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
     public void addScore() {
         score++;
+    }
+
+    public void setSpeedGame(int speedGame) {
+        this.speedGame = speedGame;
     }
 
     @Override
@@ -339,6 +341,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         }
         state = STATE_GAME_PLAY;
         score = 0;
+
         setCurrentShape();
 
     }
@@ -402,6 +405,27 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
         if (speedGame == 200) return 7;
         if (speedGame == 150) return 8;
         return 9;
+    }
+
+    @Override
+    public void upLevel() {
+        if(score < 10 ) setSpeedGame(500);
+        else
+        if(score < 20 ) setSpeedGame(450);
+        else
+        if(score < 30 ) setSpeedGame(400);
+        else
+        if(score < 40 ) setSpeedGame(350);
+        else
+        if(score < 50 ) setSpeedGame(300);
+        else
+        if(score < 60 ) setSpeedGame(250);
+        else
+        if(score < 70 ) setSpeedGame(200);
+        else
+        if(score < 80 ) setSpeedGame(150);
+        else
+        if(score > 90 ) setSpeedGame(100);
     }
 
     @Override

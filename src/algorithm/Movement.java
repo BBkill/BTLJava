@@ -1,5 +1,7 @@
 package algorithm;
 
+import java.awt.*;
+
 public interface Movement {
     public void speedUp();
 
@@ -11,5 +13,5 @@ public interface Movement {
 
     public void checkLine();
 
-
+    public void fall(Graphics g);
 }

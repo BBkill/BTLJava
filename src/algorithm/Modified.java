@@ -7,5 +7,4 @@ public interface Modified {
 
     public void reverseShape(int[][] matrix);
 
-    public void render(Graphics g);
 }

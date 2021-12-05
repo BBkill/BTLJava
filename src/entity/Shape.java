@@ -14,7 +14,7 @@ public class Shape implements Movement, Rotation, Modified {
     // coordinate of entity at the beginning
     private int x = 4, y = 0;
 
-    private int normal = 500;
+    private final int normal = 500;
     private int fast = 10;
     private int delayTimeFoMovement = normal;
     private long beginTime;
@@ -104,12 +104,82 @@ public class Shape implements Movement, Rotation, Modified {
         }
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
 
-    public void setY(int y) {
-        this.y = y;
+    // avoid collision
+    public void updateSpecial()
+    {
+        // rick the bottom
+        if (collision) {
+            boolean moveX = true;
+            // check the horizon
+            if (!(x + dentalX + coordinate[0].length > 10) && !(x + dentalX < 0)) {
+                for (int row = 0; row < coordinate.length; row++) {
+                    for (int column = 0; column < coordinate[row].length; column++) {
+                        if (coordinate[row][column] != 0) {
+                            if (board.getBoard()[y + row][x + dentalX + column] != null) {
+                                moveX = false;
+                            }
+                        }
+                    }
+                }
+                if (moveX) {
+                    x = x + dentalX;
+                }
+
+            }
+            dentalX = 0;
+            // move
+            if (System.currentTimeMillis() - beginTime > delayTimeFoMovement) {
+                if (!(y + 1 + coordinate.length > BOARD_HEIGHT)) {
+                    for (int row = 0; row < coordinate.length; row++) {
+                        for (int column = 0; column < coordinate[row].length; column++) {
+                            if (coordinate[row][column] != 0) {
+                                if (board.getBoard()[y + 1 + row][x + dentalX + column] != null) {
+                                    collision = true;
+                                }
+                            }
+                        }
+                    }
+                    if (!collision) {
+                        y++;
+                    }
+
+                } else {
+                    collision = true;
+                }
+
+                beginTime = System.currentTimeMillis();
+            }
+            for (int row = 0; row < coordinate.length; row++) {
+                for (int column = 0; column < coordinate[0].length; column++) {
+                    if (coordinate[row][column] != 0) {
+                        board.getBoard()[y + row][x + column] = Color.WHITE;
+                    }
+                }
+            }
+            checkLine();
+            board.setCurrentShape();
+            return;
+
+        }
+
+        // transparent
+        if (!(x + dentalX + coordinate[0].length > 10) && !(x + dentalX < 0))
+        {
+            x = x + dentalX;
+        }
+        dentalX = 0;
+        if (System.currentTimeMillis() - beginTime > delayTimeFoMovement) {
+            if (!(y + 1 + coordinate.length > BOARD_HEIGHT)) {
+                y++;
+            }
+            else
+            {
+                collision = true;
+            }
+            beginTime = System.currentTimeMillis();
+        }
+
     }
 
     public int getX() {
@@ -129,8 +199,8 @@ public class Shape implements Movement, Rotation, Modified {
     }
 
     @Override
-    public void render(Graphics g) {
-        // draw shape
+    public void fall(Graphics g) {
+        // draw shape when moving
         for (int row = 0; row < coordinate.length; row++) {
             for (int column = 0; column < coordinate[0].length; column++) {
                 if (coordinate[row][column] != 0) {
@@ -159,11 +229,10 @@ public class Shape implements Movement, Rotation, Modified {
                 bottomLine--;
             } else if (count == board.getBoard()[0].length) {
                 board.addScore();
+                board.upLevel();
             }
         }
     }
-
-
 
     @Override
     public void speedUp() {
