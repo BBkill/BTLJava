@@ -198,28 +198,37 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
 
 
         // draw function button
-
-
+        // new game button
         if (newGameRect.contains(mouseX, mouseY)) {
             g.drawImage(newGameButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 50,
                     null);
         } else {
             g.drawImage(newGameButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 50, null);
         }
-
-        if (pauseRect.contains(mouseX, mouseY)) {
+        // pause button
+        if (pauseRect.contains(mouseX, mouseY) && state == STATE_GAME_PLAY) {
             g.drawImage(pauseButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100,
                     null);
         } else {
             g.drawImage(pauseButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100, null);
         }
+        // quit button
         if (quitRect.contains(mouseX, mouseY)) {
             g.drawImage(quiteButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 150,
                     null);
         } else {
             g.drawImage(quiteButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 150, null);
         }
-
+        // draw continue button
+        if (state == STATE_GAME_PAUSE) {
+            if (pauseRect.contains(mouseX, mouseY)) {
+                g.drawImage(continueButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138,
+                        Window.HEIGHT / 2 + 100, null);
+            } else {
+                g.drawImage(continueButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100,
+                        null);
+            }
+        }
         // draw the board (the line)
         g.setColor(Color.black);
         for (int row = 0; row < BOARD_HEIGHT; row++) {
@@ -239,16 +248,7 @@ public class Board extends JPanel implements KeyListener, Game, MouseMotionListe
             }
         }
 
-        // draw game pause
-        if (state == STATE_GAME_PAUSE) {
-            if (pauseRect.contains(mouseX, mouseY)) {
-                g.drawImage(continueButton.getScaledInstance(100 + 6, 30 + 6, 1), Window.WIDTH - 138,
-                        Window.HEIGHT / 2 + 100, null);
-            } else {
-                g.drawImage(continueButton.getScaledInstance(100, 30, 1), Window.WIDTH - 138, Window.HEIGHT / 2 + 100,
-                        null);
-            }
-        }
+
     }
 
     public void setCurrentShape() {
